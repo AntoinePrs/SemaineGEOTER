@@ -1,23 +1,196 @@
 ---
 title: "Cartographie"
+author: "A. Peris, Avignon Université"
+date: "01/14/2025"
 format: html
 ---
 Packages
 ```{r}
+#| message: false
+#| warning: false
 library(sf)
 library(dplyr)
 library(mapview)
 library(ggplot2)
 library(ggspatial)
+library(RColorBrewer)
 ```
 
-Données : 
-- https://data.geopf.fr/telechargement/download/ADMIN-EXPRESS-COG/ADMIN-EXPRESS-COG_3-2__SHP_LAMB93_FXX_2023-05-03/ADMIN-EXPRESS-COG_3-2__SHP_LAMB93_FXX_2023-05-03.7z 
-- https://data.geopf.fr/telechargement/download/CONTOURS-IRIS/CONTOURS-IRIS_3-0__SHP__FRA_2023-01-01/CONTOURS-IRIS_3-0__SHP__FRA_2023-01-01.7z
+Chargement des données
 
-```{r}
+```{r, results='hide'}
+#| echo: true
+#| message: false
+#| warning: false
 dvf <- st_read("../data/dvf13.gpkg")
-com <- st_read("../data/COMMUNE.shp")
+iris <- st_read("../data/CONTOURS-IRIS.shp")
 ```
 
 ## Un peu de géomatique avec R
+
+Pour cette initiation à la manipulation de données spatiales avec R, nous allons cartographier les prix des appartements par IRIS à Marseille sur la période 2022-2023. Pour cela, nous sélectionnons les IRIS et les transactions d'intérêt
+
+```{r}
+# IRIS
+irisMars <- iris %>% 
+  filter(grepl("Marseille ", NOM_COM)) %>% 
+  select(CODE_IRIS, NOM_IRIS, TYP_IRIS, geometry)
+
+# Transactions
+dvfAptMars <- dvf %>% 
+  filter(substr(code_insee, 1, 3)=="132", 
+         maison==0, anneemut %in% c(2022, 2023))
+```
+
+Affichons ensuite ces deux couches avec la fonction `geom_sf()` de `ggplot2` qui permet de visualiser des données spatiales vectorielles. 
+
+```{r}
+ggplot()+
+  geom_sf(data = irisMars)+
+  geom_sf(data = dvfAptMars %>% sample_n(2000), 
+          size=.2, alpha=.4)+
+  theme_bw()
+```
+
+On veut créer un nouvel objet `sf` avec pour chaque IRIS, le prix médian et moyen au m² et le nombre de transaction. Pour cela, on va :
+- Réaliser une jointure spatiale pour associer chaque transaction à son IRIS.
+- Grouper par IRIS et calculer les statistiques (prix médian au m², nombre de transactions).
+- Joindre le tableau résultant à l'objet géométrique des IRIS.
+
+```{r}
+transactions_iris <- st_join(dvfAptMars, irisMars, join = st_within)
+
+px_iris <- transactions_iris %>% 
+  as_tibble() %>% 
+  group_by(CODE_IRIS) %>% 
+  summarise(pxm2med = round(median(pxm2), 0), 
+            pxm2moy = round(mean(pxm2), 0), 
+            nbmut = n())
+
+px_iris_sf <- left_join(irisMars, px_iris, by="CODE_IRIS")
+```
+
+## Cartographie thématique
+
+### Cartographier une variable quantitative absolue (stock)
+
+```{r}
+#| message: false
+#| warning: false
+irisMarsCtr <- st_point_on_surface(px_iris_sf)
+
+ggplot()+
+  geom_sf(data=irisMars, fill="white")+
+  geom_sf(data = irisMarsCtr, aes(size=nbmut), alpha=.4)+
+  scale_size_area(max_size = 2, breaks = c(20, 50, 100, 200))+
+  theme_bw()+
+  coord_sf(datum = NA)+
+  annotation_scale()+
+  annotation_north_arrow(height = unit(0.5, "cm"), 
+                         width = unit(0.5, "cm"), 
+                         pad_y = unit(0.7, "cm"))+
+  labs(size="Transactions", title = "Ventes d'appartements à Marseille", 
+       caption = "Source : IGN - Contour-IRIS, 2023\nAuteur : A. Peris, 2025")
+```
+
+### Cartographier une variable quantitative relative (taux, indices)
+
+Le but est de cartographier les prix médians au m² par quartier. Pour cela, nous devons d'abord étudier la distribution afin de choisir la méthode de discrétisation. 
+
+```{r}
+#| message: false
+#| warning: false
+ggplot()+
+  geom_density(data = px_iris_sf, aes(x=pxm2med))
+```
+La distribution est globalement normale avec une légère dissymétrie à gauche. On va donc utiliser une méthode par écart type et fusionner les trois classes correspondant aux quelques valeurs très élevées.
+
+```{r}
+#| message: false
+#| warning: false
+var <- px_iris_sf$pxm2med
+
+bks <- mapsf::mf_get_breaks(var, nbreaks = 6, breaks = "msd", central = T)
+bks <- bks[c(1:6, 9)]
+
+ggplot()+
+  geom_density(data = px_iris_sf, aes(x=pxm2med))+
+  geom_vline(xintercept = bks)
+```
+On effectue ensuite une carte choroplèthe.
+
+```{r}
+#| message: false
+#| warning: false
+ggplot() +
+  annotation_map_tile(type="cartolight", zoom = 11)+
+  geom_sf(data = px_iris_sf, aes(fill = pxm2med)) +
+  scale_fill_fermenter(
+    breaks = bks,
+    palette = "YlOrRd", 
+    direction = 1, 
+    na.value = "lightgrey"
+  ) +
+  theme_bw() +
+  coord_sf(datum = NA) +
+  annotation_scale() +
+  annotation_north_arrow(
+    height = unit(0.5, "cm"), 
+    width = unit(0.5, "cm"), 
+    pad_y = unit(0.7, "cm")
+  ) +
+  labs(
+    fill = "Prix (€/m²)", 
+    title = "Prix des appartements à Marseille", 
+    subtitle = "Médiane du prix au m² des transactions de\n2022 et 2023 dans chaque IRIS",
+    caption = "Source : DVF+, 2023\nAuteur : A. Peris, 2025"
+  )
+```
+
+
+### Cartographier une variable qualitative (typologie)
+
+```{r}
+ggplot()+
+  geom_sf(data=irisMars, aes(fill=TYP_IRIS))+
+  scale_fill_manual(values = c("grey","darkgreen",  "orange"))+
+  theme_bw()+
+  coord_sf(datum = NA)+
+  annotation_scale()+
+  annotation_north_arrow(height = unit(0.5, "cm"), 
+                         width = unit(0.5, "cm"), 
+                         pad_y = unit(0.7, "cm"))+
+  labs(fill="Type", title = "Les types d'IRIS de la commune de Marseille", 
+       caption = "Source : IGN - Contour-IRIS, 2023\nAuteur : A. Peris, 2025")
+```
+
+### Cartographier une combinaison de variables de stock et d'indice
+
+```{r}
+#| message: false
+#| warning: false
+ggplot()+
+  geom_sf(data=irisMars, fill="white")+
+  geom_sf(data = irisMarsCtr, aes(size=nbmut, fill=pxm2med),
+          pch=21, 
+          stroke=.1)+
+  scale_size_area(max_size = 2, breaks = c(20, 50, 100, 200))+
+  scale_fill_fermenter(
+    breaks = bks,
+    palette = "YlOrRd", 
+    direction = 1, 
+    na.value = "lightgrey"
+  ) +
+  theme_bw()+
+  coord_sf(datum = NA)+
+  annotation_scale()+
+  annotation_north_arrow(height = unit(0.5, "cm"), 
+                         width = unit(0.5, "cm"), 
+                         pad_y = unit(0.7, "cm"))+
+  labs(size="Transactions", fill = "Prix (€/m²)", 
+       title = "Nombre de ventes et prix des appartements à Marseille", 
+        subtitle = "Période de 2022 à 2023",
+       caption = "Source : DVF+\nAuteur : A. Peris, 2025")
+```
+
+

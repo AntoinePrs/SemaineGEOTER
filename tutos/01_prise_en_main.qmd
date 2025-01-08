@@ -1,7 +1,7 @@
 ---
-title: "Prise en main des donnés DVF+"
+title: "Prise en main des données DVF+"
 author: "A. Peris, Avignon Université"
-date: "13/01/2025"
+date: "01/13/2025"
 format: html
 editor: visual
 ---

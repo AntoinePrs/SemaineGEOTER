@@ -1,7 +1,7 @@
 ---
 title: "Visualiser des données avec ggplot2"
 author: "A. Peris, Avignon Université"
-date: "13/01/2025"
+date: "01/13/2025"
 format: html
 ---
 
@@ -15,7 +15,8 @@ library(ggplot2)
 ```
 
 Chargement des données à visualiser
-```{r}
+```{r, results='hide'}
+#| echo: true
 #| message: false
 #| warning: false
 dvf <- st_read("../data/dvf13.gpkg")
@@ -47,7 +48,7 @@ ggplot() +
        subtitle = "Transactions dans l'immobilier résidentiel (maisons et appartements)", 
        x = "Année", 
        y = "Volume",
-       caption = "Source : DVF+\nRéalisation : Antoine Peris, 2025") +
+       caption = "Source : DVF+\nRéalisation : A. Peris, 2025") +
   theme_minimal()
 ```
 
@@ -73,7 +74,7 @@ ggplot()+
        subtitle = "Prix au m² dans l'immobilier résidentiel (maisons et appartements) en 2023", 
        x = "Prix au m²", 
        y = "Fréquence",
-       caption = "Source : DVF+\nRéalisation : Antoine Peris, 2025")
+       caption = "Source : DVF+\nRéalisation : A. Peris, 2025")
 ```
 
 ### Boîtes à moustache
@@ -95,7 +96,7 @@ ggplot()+
        subtitle = "Distribution des prix par arrondissements en 2023", 
        x = "Arrondissements", 
        y = "Prix (m²)",
-       caption = "Source : DVF+\nRéalisation : Antoine Peris, 2025")+
+       caption = "Source : DVF+\nRéalisation : A. Peris, 2025")+
   theme(panel.grid.major.x = element_blank())
 ```
 
@@ -121,7 +122,7 @@ ggplot(evolTypoMars, aes(x=anneemut, y=pxm2med, color=type))+
        subtitle = "Prix par m² par type de logement entre 2014 et 2023", 
        x = "Années", 
        y = "Prix (m²)",
-       caption = "Source : DVF+\nRéalisation : Antoine Peris, 2025")
+       caption = "Source : DVF+\nRéalisation : A. Peris, 2025")
 
 ```
 
@@ -142,7 +143,7 @@ ggplot(dvf23Mars, aes(x = "", y = proportion, fill = type)) +
   coord_polar(theta = "y") +
   labs(title = "Les logements vendus en 2023",
        fill = "Type de bien",
-       caption = "Source : DVF+\nRéalisation : Antoine Peris, 2025") +
+       caption = "Source : DVF+\nRéalisation : A. Peris, 2025") +
   theme_void()
 
 ```
@@ -161,14 +162,14 @@ g1 <- ggplot(evolTypoMars, aes(x=anneemut, y=pxm2med, color=type))+
        subtitle = "Prix par m² par type de logement entre 2014 et 2023", 
        x = "Années", 
        y = "Prix (m²)",
-       caption = "Source : DVF+\nRéalisation : Antoine Peris, 2025")
+       caption = "Source : DVF+\nRéalisation : A. Peris, 2025")
 
 g2 <- ggplot(dvf23Mars, aes(x = "", y = proportion, fill = type)) +
   geom_bar(stat = "identity", width = 1, color = "white") +
   coord_polar(theta = "y") +
   labs(title = "Les logements vendus en 2023",
        fill = "Type de bien",
-       caption = "Source : DVF+\nRéalisation : Antoine Peris, 2025") +
+       caption = "Source : DVF+\nRéalisation : A. Peris, 2025") +
   theme_void()
 
 library(cowplot)

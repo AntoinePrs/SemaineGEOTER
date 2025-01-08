@@ -6,21 +6,18 @@ Supports utilisés lors de la semaine thématique sur les données massives du M
 
 ## Données
 
-[DVF+ (CEREMA)](https://datafoncier.cerema.fr/donnees/autres-donnees-foncieres/dvfplus-open-data)
-
-ADMIN-EXPRESS (IGN)
-
-Contours-IRIS 
+- [DVF+ (CEREMA)](https://datafoncier.cerema.fr/donnees/autres-donnees-foncieres/dvfplus-open-data)
+- [ADMIN-EXPRESS (IGN)](https://data.geopf.fr/telechargement/download/ADMIN-EXPRESS-COG/ADMIN-EXPRESS-COG_3-2__SHP_LAMB93_FXX_2023-05-03/ADMIN-EXPRESS-COG_3-2__SHP_LAMB93_FXX_2023-05-03.7z)
+- [Contours-IRIS](https://data.geopf.fr/telechargement/download/CONTOURS-IRIS/CONTOURS-IRIS_3-0__SHP__FRA_2023-01-01/CONTOURS-IRIS_3-0__SHP__FRA_2023-01-01.7z) 
 
 ## Ressources complémentaires
 
 ### Articles
 
 - Casanova Enault L., Boulay G., Coulon M., 2019, « Une aubaine pour les 
-  géographes ? Intérêts des fichiers open DVF sur les transactions 
-  foncières et immobilières et précautions d’usage », *Cybergeo : European Journal of Geography*, https://journals.openedition.org/cybergeo/33602
-
-- Mericskay B.,  Demoraes F., « Préparer et analyser les données de "Demandes de valeurs foncières" en *open data* : proposition d’une méthodologie reproductible », *Cybergeo: European Journal of Geography*, https://doi.org/10.4000/cybergeo.39583
+  géographes ? Intérêts des fichiers open DVF sur les transactions 
+  foncières et immobilières et précautions d’usage », *Cybergeo : European Journal of Geography*, https://journals.openedition.org/cybergeo/33602
+- Mericskay B.,  Demoraes F., « Préparer et analyser les données de "Demandes de valeurs foncières" en *open data* : proposition d’une méthodologie reproductible », *Cybergeo: European Journal of Geography*, https://doi.org/10.4000/cybergeo.39583
 
 ### Tutoriels et cours
 
