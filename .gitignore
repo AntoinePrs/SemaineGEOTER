@@ -4,3 +4,9 @@
 .Ruserdata
 .gpkg
 .csv
+data/*
+.shp
+.dbf
+.prj
+.cpg
+.shx

@@ -1,0 +1,23 @@
+---
+title: "Cartographie"
+format: html
+---
+Packages
+```{r}
+library(sf)
+library(dplyr)
+library(mapview)
+library(ggplot2)
+library(ggspatial)
+```
+
+Données : 
+- https://data.geopf.fr/telechargement/download/ADMIN-EXPRESS-COG/ADMIN-EXPRESS-COG_3-2__SHP_LAMB93_FXX_2023-05-03/ADMIN-EXPRESS-COG_3-2__SHP_LAMB93_FXX_2023-05-03.7z 
+- https://data.geopf.fr/telechargement/download/CONTOURS-IRIS/CONTOURS-IRIS_3-0__SHP__FRA_2023-01-01/CONTOURS-IRIS_3-0__SHP__FRA_2023-01-01.7z
+
+```{r}
+dvf <- st_read("../data/dvf13.gpkg")
+com <- st_read("../data/COMMUNE.shp")
+```
+
+## Un peu de géomatique avec R

@@ -1,5 +1,7 @@
 ---
 title: "Prise en main des donnés DVF+"
+author: "A. Peris, Avignon Université"
+date: "13/01/2025"
 format: html
 editor: visual
 ---
@@ -67,7 +69,7 @@ On applique alors une fonction pour extraire les caractères 2 à 6 de chaque ce
 
 ```{r}
 dvf <- dvf %>% 
-  mutate(code_insee = substr(l_codinsee, 2, 6)) %>% 
+  mutate(code_insee = as.character(substr(l_codinsee, 2, 6))) %>% 
   select(-l_codinsee)
 
 head(dvf$code_insee)
@@ -101,12 +103,19 @@ dvf <- left_join(dvf, piece_long, by="idmutation")
 dvf <- dvf[,c(1:12, 23:25)]
 ```
 
-Enfin, on veut que l'information décrivant si le logement est un appartement ou une maison soit stockée dans une seule colonne.
+On veut également que l'information décrivant si le logement est un appartement ou une maison soit stockée dans une seule colonne.
 
 ```{r}
 dvf <- dvf %>% 
   mutate(maison = ifelse(nblocmai==1, 1, 0)) %>% 
   select(-nblocmai, -nblocapt)
+```
+
+Enfin, nous calculons un prix au m² qui sera stocké dans le tableau.
+
+```{r}
+dvf <- dvf %>% 
+  mutate(pxm2 = valeurfonc / sbati)
 ```
 
 Une fois propres, on peut sauvegarder les données dans le format souhaité (en geopackage par exemple) :
@@ -117,9 +126,7 @@ st_write(dvf, "../data/dvf13.gpkg", append = F)
 
 ## Statistiques descriptives
 
-Lorsque l'on l'on manipule des *microdonnées*, c'est à dire des données désagrégées ou les entités élémentaires (ici les transactions immobilières) correspondent à une ligne du tableau, il n'est pas rare de devoir effectuer des agrégations pour extraire de l'information de ces données. Pour cela, le verbe `group_by()` peut être utilisé en combinaison avec `summarise()`.
-
-Nombre de transactions correspondant à des maisons et des appartements.
+Lorsque l'on l'on manipule des *microdonnées*, c'est à dire des données désagrégées ou les entités élémentaires (ici les transactions immobilières) correspondent à une ligne du tableau, il n'est pas rare de devoir effectuer des agrégations. Pour cela, le verbe `group_by()` peut être utilisé en combinaison avec `summarise()` qui permet de créer une nouvelle colonne calculée. On pourra par exemple effectuer une moyenne avec `mean()`, une médiane avec `median()`, rechercher des bornes avec `min()` ou `max()` ou encore dénombrer avec `n()` comme dans l'exemple suivant sur le nombre de transactions correspondant à des maisons et des appartements.
 
 ```{r}
 dvf %>% 
@@ -161,12 +168,11 @@ dvf %>%
   kable()
 ```
 
-Communes où les prix au $m^{2}$ les plus élevés.
+Communes où les prix au m² les plus élevés.
 
 ```{r}
 dvf %>% 
   as_tibble() %>% 
-  mutate(pxm2=valeurfonc/sbati) %>% 
   group_by(code_insee) %>% 
   summarise(pxm2med=median(pxm2)) %>% 
   arrange(desc(pxm2med)) %>% 
@@ -194,7 +200,7 @@ Ainsi, l'évolution du prix médian au m² des 1 pièces dans le premier arrondi
 
 ```{r}
 dvf1pMars %>% 
-  mutate(pxm2=valeurfonc/sbati) %>% 
+  as_tibble() %>% 
   group_by(anneemut) %>% 
   summarise(pxm2med=median(pxm2)) %>% 
   kable()

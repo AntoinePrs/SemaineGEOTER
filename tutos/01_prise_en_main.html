@@ -6,6 +6,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
+<meta name="author" content="A. Peris Avignon Université">
+<meta name="dcterms.date" content="2026-01-01">
 
 <title>Prise en main des donnés DVF+</title>
 <style>
@@ -68,35 +70,6 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <link href="01_prise_en_main_files/libs/bootstrap/bootstrap-icons.css" rel="stylesheet">
 <link href="01_prise_en_main_files/libs/bootstrap/bootstrap.min.css" rel="stylesheet" id="quarto-bootstrap" data-mode="light">
 
-  <script src="https://cdnjs.cloudflare.com/polyfill/v3/polyfill.min.js?features=es6"></script>
-  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js" type="text/javascript"></script>
-
-<script type="text/javascript">
-const typesetMath = (el) => {
-  if (window.MathJax) {
-    // MathJax Typeset
-    window.MathJax.typeset([el]);
-  } else if (window.katex) {
-    // KaTeX Render
-    var mathElements = el.getElementsByClassName("math");
-    var macros = [];
-    for (var i = 0; i < mathElements.length; i++) {
-      var texText = mathElements[i].firstChild;
-      if (mathElements[i].tagName == "SPAN") {
-        window.katex.render(texText.data, mathElements[i], {
-          displayMode: mathElements[i].classList.contains('display'),
-          throwOnError: false,
-          macros: macros,
-          fleqn: false
-        });
-      }
-    }
-  }
-}
-window.Quarto = {
-  typesetMath
-};
-</script>
 
 </head>
 
@@ -115,7 +88,19 @@ window.Quarto = {
 
 <div class="quarto-title-meta">
 
+    <div>
+    <div class="quarto-title-meta-heading">Author</div>
+    <div class="quarto-title-meta-contents">
+             <p>A. Peris Avignon Université </p>
+          </div>
+  </div>
     
+    <div>
+    <div class="quarto-title-meta-heading">Published</div>
+    <div class="quarto-title-meta-contents">
+      <p class="date">January 1, 2026</p>
+    </div>
+  </div>
   
     
   </div>
@@ -401,7 +386,7 @@ window.Quarto = {
 <p>On applique alors une fonction pour extraire les caractères 2 à 6 de chaque cellule grâce au verbe <code>mutate()</code> qui permet la modification d’une colonne. Le verbe <code>select()</code> permet la sélection (ou non) de colonnes données.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">code_insee =</span> <span class="fu">substr</span>(l_codinsee, <span class="dv">2</span>, <span class="dv">6</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">code_insee =</span> <span class="fu">as.character</span>(<span class="fu">substr</span>(l_codinsee, <span class="dv">2</span>, <span class="dv">6</span>))) <span class="sc">%&gt;%</span> </span>
 <span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>l_codinsee)</span>
 <span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dvf<span class="sc">$</span>code_insee)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -597,31 +582,31 @@ window.Quarto = {
 <span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Suppression des anciennes colonnes</span></span>
 <span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf[,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="dv">23</span><span class="sc">:</span><span class="dv">25</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
-<p>Enfin, on veut que l’information décrivant si le logement est un appartement ou une maison soit stockée dans une seule colonne.</p>
+<p>On veut également que l’information décrivant si le logement est un appartement ou une maison soit stockée dans une seule colonne.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">maison =</span> <span class="fu">ifelse</span>(nblocmai<span class="sc">==</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>nblocmai, <span class="sc">-</span>nblocapt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>Enfin, nous calculons un prix au m² qui sera stocké dans le tableau.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pxm2 =</span> valeurfonc <span class="sc">/</span> sbati)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
 <p>Une fois propres, on peut sauvegarder les données dans le format souhaité (en geopackage par exemple) :</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(dvf, <span class="st">"../data/dvf13.gpkg"</span>, <span class="at">append =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
-<div class="cell-output cell-output-stderr">
-<pre><code>Warning in clean_columns(as.data.frame(obj), factorsAsCharacter): Dropping
-column(s) code_insee of class(es) pq__varchar</code></pre>
-</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(dvf, <span class="st">"../data/dvf13.gpkg"</span>, <span class="at">append =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Deleting layer `dvf13' using driver `GPKG'
 Writing layer `dvf13' to data source `../data/dvf13.gpkg' using driver `GPKG'
-Writing 266065 features with 13 fields and geometry type Unknown (any).</code></pre>
+Writing 266065 features with 15 fields and geometry type Unknown (any).</code></pre>
 </div>
 </div>
 </section>
 </section>
 <section id="statistiques-descriptives" class="level2">
 <h2 class="anchored" data-anchor-id="statistiques-descriptives">Statistiques descriptives</h2>
-<p>Lorsque l’on l’on manipule des <em>microdonnées</em>, c’est à dire des données désagrégées ou les entités élémentaires (ici les transactions immobilières) correspondent à une ligne du tableau, il n’est pas rare de devoir effectuer des agrégations pour extraire de l’information de ces données. Pour cela, le verbe <code>group_by()</code> peut être utilisé en combinaison avec <code>summarise()</code>.</p>
-<p>Nombre de transactions correspondant à des maisons et des appartements.</p>
+<p>Lorsque l’on l’on manipule des <em>microdonnées</em>, c’est à dire des données désagrégées ou les entités élémentaires (ici les transactions immobilières) correspondent à une ligne du tableau, il n’est pas rare de devoir effectuer des agrégations. Pour cela, le verbe <code>group_by()</code> peut être utilisé en combinaison avec <code>summarise()</code> qui permet de créer une nouvelle colonne calculée. On pourra par exemple effectuer une moyenne avec <code>mean()</code>, une médiane avec <code>median()</code>, rechercher des bornes avec <code>min()</code> ou <code>max()</code> ou encore dénombrer avec <code>n()</code> comme dans l’exemple suivant sur le nombre de transactions correspondant à des maisons et des appartements.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
 <span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
@@ -831,16 +816,15 @@ Writing 266065 features with 13 fields and geometry type Unknown (any).</code></
 </table>
 </div>
 </div>
-<p>Communes où les prix au <span class="math inline">\(m^{2}\)</span> les plus élevés.</p>
+<p>Communes où les prix au m² les plus élevés.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
 <span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pxm2=</span>valeurfonc<span class="sc">/</span>sbati) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(code_insee) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pxm2med=</span><span class="fu">median</span>(pxm2)) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(pxm2med)) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(code_insee) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pxm2med=</span><span class="fu">median</span>(pxm2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(pxm2med)) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -909,7 +893,7 @@ Writing 266065 features with 13 fields and geometry type Unknown (any).</code></
 <p>Ainsi, l’évolution du prix médian au m² des 1 pièces dans le premier arrondissement :</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>dvf1pMars <span class="sc">%&gt;%</span> </span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pxm2=</span>valeurfonc<span class="sc">/</span>sbati) <span class="sc">%&gt;%</span> </span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
 <span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anneemut) <span class="sc">%&gt;%</span> </span>
 <span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pxm2med=</span><span class="fu">median</span>(pxm2)) <span class="sc">%&gt;%</span> </span>
 <span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -919,59 +903,48 @@ Writing 266065 features with 13 fields and geometry type Unknown (any).</code></
 <tr class="header">
 <th style="text-align: right;">anneemut</th>
 <th style="text-align: right;">pxm2med</th>
-<th style="text-align: left;">geom</th>
 </tr>
 </thead>
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">2014</td>
 <td style="text-align: right;">2128.289</td>
-<td style="text-align: left;">MULTIPOINT ((892605.1 62465…</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2015</td>
 <td style="text-align: right;">2083.333</td>
-<td style="text-align: left;">MULTIPOINT ((892640.4 62465…</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2016</td>
 <td style="text-align: right;">2193.548</td>
-<td style="text-align: left;">MULTIPOINT ((892533.7 62466…</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2017</td>
 <td style="text-align: right;">2457.386</td>
-<td style="text-align: left;">MULTIPOINT ((892556.6 62465…</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2018</td>
 <td style="text-align: right;">2431.034</td>
-<td style="text-align: left;">MULTIPOINT ((892539.9 62466…</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2019</td>
 <td style="text-align: right;">2724.138</td>
-<td style="text-align: left;">MULTIPOINT ((892539.9 62466…</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2020</td>
 <td style="text-align: right;">2773.250</td>
-<td style="text-align: left;">MULTIPOINT ((892556.6 62465…</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2021</td>
 <td style="text-align: right;">3035.714</td>
-<td style="text-align: left;">MULTIPOINT ((892548.1 62466…</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2022</td>
 <td style="text-align: right;">3417.344</td>
-<td style="text-align: left;">MULTIPOINT ((892539.9 62466…</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2023</td>
 <td style="text-align: right;">3400.000</td>
-<td style="text-align: left;">MULTIPOINT ((892533.7 62466…</td>
 </tr>
 </tbody>
 </table>
