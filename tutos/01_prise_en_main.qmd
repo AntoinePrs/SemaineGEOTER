@@ -1,0 +1,201 @@
+---
+title: "Prise en main des donnés DVF+"
+format: html
+editor: visual
+---
+
+Packages
+
+```{r}
+#| message: false
+#| warning: false
+library(DBI) # Interface avec une base de données 
+library(RPostgres) # Drivers PostgreSQL
+library(sf) # Permet de gérer du spatial dans R
+library(dplyr) # Manipulation de données tabulaires
+library(tidyr) # Autre package de manipulation de données tabulaires
+library(knitr) # Jolis tableaux
+```
+
+## Chargement et préparation des données
+
+### Chargement
+
+Connection à un serveur PostgreSQL
+
+```{r}
+#| message: false
+#| warning: false
+#| output: false
+con <- dbConnect(RPostgres::Postgres(), 
+                 dbname = "dvfplus",
+                 host="localhost", 
+                 port='5432', 
+                 user="postgres", 
+                 password="postgres")
+```
+
+Requête SQL sur la base de données pour récupérer toutes les transactions immobilières portant sur une maison ou un appartement dans le département des Bouches-du-Rhône. La fonction `st_read()` du package `sf` permet de lire des données spatiales vectorielles.
+
+```{r}
+dvf <- st_read(con, query = "
+SELECT idmutation, datemut, anneemut, moismut, coddep, libnatmut, vefa, valeurfonc, 
+l_codinsee, sterr, sbati, nblocmai, nblocapt,nblocdep, nbapt1pp, nbapt2pp, nbapt3pp, 
+nbapt4pp, nbapt5pp, nbmai1pp, nbmai2pp, nbmai3pp, nbmai4pp, nbmai5pp, 
+geomlocmut as geom
+FROM dvf.mutation
+WHERE nbcomm = 1
+AND coddep = '13'
+AND libtypbien IN ('UNE MAISON', 'UN APPARTEMENT')
+AND geomlocmut IS NOT NULL
+AND valeurfonc IS NOT NULL")
+
+kable(head(dvf))
+```
+
+A noter qu'un objet `sf` est un simple data frame auquel une colonne géométrique (ici `geom`) est ajoutée.
+
+### Nettoyage
+
+Pour nettoyer les données, il est possible d'utiliser le package `dplyr`, qui implémente une syntaxe permettant de filtrer des données selon des conditions, de sélectionner des colonnes ou encore d'appliquer des fonctions afin de nettoyer les données. Par exemple, dans notre tableau, la colonne `l_codinsee` comporte des codes communes entourés d'accolades dont on voudrait se débarasser.
+
+```{r}
+head(dvf$l_codinsee)
+```
+
+On applique alors une fonction pour extraire les caractères 2 à 6 de chaque cellule grâce au verbe `mutate()` qui permet la modification d'une colonne. Le verbe `select()` permet la sélection (ou non) de colonnes données.
+
+```{r}
+dvf <- dvf %>% 
+  mutate(code_insee = substr(l_codinsee, 2, 6)) %>% 
+  select(-l_codinsee)
+
+head(dvf$code_insee)
+```
+
+L'information sur le nombre de pièces du logement est stockée dans un format qui n'est pas pratique à manipuler.
+
+```{r}
+dvf %>% 
+  as_tibble() %>% 
+  select(idmutation, nbapt1pp:nbmai5pp) %>% 
+  slice(1:10) %>% 
+  kable()
+```
+
+L'opération qui suit va appliquer une série de fonction afin de transformer ce tableau en format "large" en tableau en format "long" où chaque `idmutation` sera associé à un nombre de pièces.
+
+```{r}
+piece_long <- dvf %>%
+  as_tibble() %>% # transformation en tableau
+  select(idmutation, nbapt1pp:nbmai5pp) %>% # extraction des colonnes de référence 
+  pivot_longer(nbapt1pp:nbmai5pp) %>% # passage en format long
+  filter(value==1) %>% # élimination des 0
+  mutate(nbpiece=as.numeric(substr(name,6,6))) %>% # extraction du nombre 
+  select(idmutation, nbpiece) # sélection des deux colonnes d'intérêt
+
+# Jointure du nouveau format au tableau original
+dvf <- left_join(dvf, piece_long, by="idmutation")
+
+# Suppression des anciennes colonnes
+dvf <- dvf[,c(1:12, 23:25)]
+```
+
+Enfin, on veut que l'information décrivant si le logement est un appartement ou une maison soit stockée dans une seule colonne.
+
+```{r}
+dvf <- dvf %>% 
+  mutate(maison = ifelse(nblocmai==1, 1, 0)) %>% 
+  select(-nblocmai, -nblocapt)
+```
+
+Une fois propres, on peut sauvegarder les données dans le format souhaité (en geopackage par exemple) :
+
+```{r}
+st_write(dvf, "../data/dvf13.gpkg", append = F)
+```
+
+## Statistiques descriptives
+
+Lorsque l'on l'on manipule des *microdonnées*, c'est à dire des données désagrégées ou les entités élémentaires (ici les transactions immobilières) correspondent à une ligne du tableau, il n'est pas rare de devoir effectuer des agrégations pour extraire de l'information de ces données. Pour cela, le verbe `group_by()` peut être utilisé en combinaison avec `summarise()`.
+
+Nombre de transactions correspondant à des maisons et des appartements.
+
+```{r}
+dvf %>% 
+  as_tibble() %>% 
+  group_by(maison) %>% 
+  summarise(nb=n()) %>% 
+  kable()
+```
+
+Volumes annuels de transactions.
+
+```{r}
+dvf %>% 
+  as_tibble() %>% 
+  group_by(anneemut) %>% 
+  summarise(volume=n()) %>% 
+  kable()
+```
+
+Communes où il y a eu le plus de ventes
+
+```{r}
+dvf %>% 
+  as_tibble() %>% 
+  group_by(code_insee) %>% 
+  summarise(volume=n()) %>% 
+  arrange(desc(volume)) %>% 
+  slice(1:10) %>% 
+  kable()
+```
+
+Prix médian des transactions par an
+
+```{r}
+dvf %>% 
+  as_tibble() %>% 
+  group_by(anneemut) %>% 
+  summarise(mediane=median(valeurfonc)) %>% 
+  kable()
+```
+
+Communes où les prix au $m^{2}$ les plus élevés.
+
+```{r}
+dvf %>% 
+  as_tibble() %>% 
+  mutate(pxm2=valeurfonc/sbati) %>% 
+  group_by(code_insee) %>% 
+  summarise(pxm2med=median(pxm2)) %>% 
+  arrange(desc(pxm2med)) %>% 
+  slice(1:10) %>% 
+  kable()
+```
+
+Le verbe `filter()` permet d'extraire des données selon des conditions (de la même manière qu'un `WHERE` en SQL. Par exemple si on veut extraire les données correspondant aux maisons, on écrira :
+
+```{r}
+dvfmais <- dvf %>% 
+  filter(maison==1)
+```
+
+Si on veut les appartements d'une pièce dans le premier arrondissement de Marseille :
+
+```{r}
+dvf1pMars <- dvf %>% 
+  filter(maison==0, 
+         code_insee == "13201", 
+         nbpiece == 1)
+```
+
+Ainsi, l'évolution du prix médian au m² des 1 pièces dans le premier arrondissement :
+
+```{r}
+dvf1pMars %>% 
+  mutate(pxm2=valeurfonc/sbati) %>% 
+  group_by(anneemut) %>% 
+  summarise(pxm2med=median(pxm2)) %>% 
+  kable()
+```
