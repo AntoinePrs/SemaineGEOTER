@@ -1,0 +1,123 @@
+---
+title: "Analyse spatiale"
+author: "A. Peris, Avignon Université"
+date: "01/15/2025"
+format: html
+---
+
+Ce tutoriel est très largement inspiré du cours de R. Leconte : <https://github.com/leconter/SPACER/blob/main/03_Disc.Rmd>
+
+Packages
+
+```{r}
+#| message: false
+#| warning: false
+library(sf)
+library(ggplot2)
+library(dplyr)
+library(ggspatial)
+```
+
+Chargement des données
+
+```{r, results='hide'}
+pxIrisMars <- st_read("../data/pxIrisMars.gpkg")
+```
+
+## Cartographie des discontinuités
+
+Pour cartographier des discontinuités, il est nécessaire d'extraire des objets correspondant aux frontières entre les IRIS. Pour cela, on va :
+
+-   extraire les géométries de nos IRIS;
+
+-   faire une auto-intersection de buffers de *n* mètres autour des communes;
+
+-   transformer le résultat de cette auto-intersection en lignes;
+
+-   supprimer les lignes qui ne sont pas un point de contact entre deux IRIS;
+
+-   créer un identifiant propre à chaque ligne à partir du code des deux IRIS.
+
+```{r}
+#| message: false
+#| warning: false
+iris <- pxIrisMars %>% select(CODE_IRIS, geom)
+# Auto-intersection des communes (avec buffer, en mètres)
+iris_borders  <- st_intersection(st_buffer(iris, 10), st_buffer(iris, 10)) 
+
+# Transformation des géométries en 'MULTILINESTRING'
+iris_borders  <- st_cast(iris_borders ,"MULTILINESTRING")
+
+# Suppression des intersections entre un même polygone
+iris_borders  <- iris_borders [iris_borders$CODE_IRIS != iris_borders$CODE_IRIS.1, ] 
+
+# Construction d'un identifiant unique pour chaque frontière
+iris_borders$CODE_IRIS1 <- iris_borders$CODE_IRIS
+iris_borders$CODE_IRIS2 <- iris_borders$CODE_IRIS.1
+iris_borders$CODE_IRIS <-  paste0(iris_borders$CODE_IRIS1, "_", iris_borders$CODE_IRIS2)
+rownames(iris_borders) <- iris_borders$CODE_IRIS
+iris_borders  <- iris_borders [,c("CODE_IRIS","CODE_IRIS1","CODE_IRIS2","geom")]
+
+ggplot()+
+  geom_sf(data = iris_borders)
+```
+
+Grâce à la présence des deux identifiants, on effectue deux jointures pour ajouter l'information sur les prix des deux IRIS en contact sur une frontière donnée.
+
+```{r}
+# Récupération de la variable d'intéret, en supprimant la géométrie associée
+vals <- pxIrisMars %>% 
+  as_tibble() %>% 
+  select(CODE_IRIS, pxm2med)
+
+# Double jointure pour récupérer les valeurs des NUTS limitrophes
+iris_borders <- left_join(iris_borders, vals, by=c("CODE_IRIS1"="CODE_IRIS"))
+iris_borders <- left_join(iris_borders, vals, by=c("CODE_IRIS2"="CODE_IRIS"))
+
+# calcul de la discontinuité relative
+iris_borders$disc <- iris_borders$pxm2med.x / iris_borders$pxm2med.y
+
+# on ne conserve que les 10% des discontinuités les plus fortes
+threshold <- 0.90
+disc <- iris_borders[iris_borders$disc >= quantile(iris_borders$disc,threshold, na.rm = T),]
+
+ggplot()+
+  geom_sf(data = iris)+
+  geom_sf(data = disc)
+```
+
+On cartographie ensuite ces discontinuités en reprennant le code du tutoriel précédent.
+
+```{r}
+#| message: false
+#| warning: false
+
+bks <- mapsf::mf_get_breaks(pxIrisMars$pxm2med, nbreaks = 6, breaks = "msd", central = T)
+bks <- bks[c(1:6, 9)]
+
+ggplot() +
+  annotation_map_tile(type="cartolight", zoom = 11)+
+  geom_sf(data = pxIrisMars, aes(fill = pxm2med)) +
+    geom_sf(data = disc, aes(color="Discontinuité"))+
+  scale_color_manual(values = "black")+
+  scale_fill_fermenter(
+    breaks = bks,
+    palette = "YlOrRd", 
+    direction = 1, 
+    na.value = "lightgrey"
+  ) +
+  theme_bw() +
+  coord_sf(datum = NA) +
+  annotation_scale() +
+  annotation_north_arrow(
+    height = unit(0.5, "cm"), 
+    width = unit(0.5, "cm"), 
+    pad_y = unit(0.7, "cm")
+  ) +
+  labs(
+    fill = "Prix (€/m²)", 
+    title = "Les discontinutés les plus fortes dans les niveaux de prix des IRIS", 
+    subtitle = "Médiane du prix au m² des transactions de\n2022 et 2023 dans chaque IRIS",
+    caption = "Source : DVF+ (DGFIP/DGALN/Cerema)\nAuteur : A. Peris, 2025", 
+    color="")
+```
