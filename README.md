@@ -4,6 +4,13 @@
 
 Supports utilisés lors de la semaine thématique sur les données massives du Master Géomatique et conduite de projet territoriaux (GEOTER) d'Avignon Université. 
 
+## Tutoriels
+
+1. Prise en main de DVF+
+2. Visualisation avec `ggplot2`
+3. Cartographie avec `sf` et `ggplot2`
+4. Analyse spatiale (discontinuités et auto-corrélation spatiale)
+
 ## Données
 
 - [DVF+ (CEREMA)](https://datafoncier.cerema.fr/donnees/autres-donnees-foncieres/dvfplus-open-data)

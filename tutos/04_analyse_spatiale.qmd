@@ -121,3 +121,111 @@ ggplot() +
     caption = "Source : DVF+ (DGFIP/DGALN/Cerema)\nAuteur : A. Peris, 2025", 
     color="")
 ```
+
+## Auto-corrélation spatiale
+
+Packages
+
+```{r}
+#| message: false
+#| warning: false
+library(spdep)
+library(rgeoda)
+```
+
+### Indice global de Moran
+
+L'indice global de Moran est une mesure statistique qui évalue le degré d'autocorrélation spatiale d'une variable sur l'ensemble d'une zone d'étude. Il indiquesi les valeurs similaires ont tendance à se regrouper dans l'espace.
+
+Pour le calculer, on a besoin de construire une *matrice de poids* qui est un objet qui indique, pour chaque entité spatiale, son voisinage.
+
+```{r}
+# Extraction des IRIS dont la valeur n'est pas NA
+pxIrisWona <- pxIrisMars[!is.na(pxIrisMars$pxm2med),]
+
+# Extraction de la liste des voisins (contiguïté d'ordre 1) pour chaque unité spatiale 
+pxIrisWona.nb <- poly2nb(pxIrisWona)
+
+# Création de la matrice de poids permettant de calculer les valeurs moyennes du voisinage
+pxIrisWona.lw <- nb2listw(pxIrisWona.nb, zero.policy =  TRUE)
+```
+
+Pour le calcul, on standardise les variables
+
+```{r}
+# Standardisation de la variable d'intérêt (mesurée en écart à la moyenne de la variable)
+pxIrisWona$px_std <- as.vector(scale(pxIrisWona$pxm2med))
+
+# Diagramme de Moran
+moran.plot(pxIrisWona$px_std, pxIrisWona.lw, labels = FALSE,
+           xlab = "Prix des IRIS",
+           ylab = "Prix des IRIS voisins")
+```
+
+*Interpréter le diagramme de Moran*
+
+-   Les observations situées en haut à droite (quadrant 1) présentent des valeurs de la variable plus élevées que la moyenne, dans un voisinage qui leur ressemble (autocorrélation spatiale positive et valeur de l’indice élevé ; structure high-high).
+-   En bas à gauche (quadrant 3), les observations présentent des valeurs de la variable plus faibles que la moyenne, dans un voisinage qui leur ressemble (autocorrélation spatiale positive et valeur de l’indice faible ; structure low-low).
+-   Les observations situées en bas à droite (quadrant 2) ont des valeurs de la variable plus élevées que la moyenne dans un voisinage qui ne leur ressemble pas (autocorrélation spatiale négative et valeur de l’indice élevé ; structure high-low).
+-   En haut à gauche (quadrant 4), les observations présentent des valeurs de la variable plus basses que la moyenne dans un voisinage qui ne leur ressemble pas (autocorrélation spatiale négative et valeur de l’indice faible ; structure low-high).
+
+```{r}
+# Test du I de Moran
+moran.test(pxIrisWona$px_std, pxIrisWona.lw, zero.policy =  TRUE, randomisation = FALSE)
+```
+
+*Interpréter le test de Moran*
+
+Quand I \> 0, autocorrélation spatiale positive Quand I \< 0, autocorrélation spatiale négative
+
+La p.value permet de rejeter l'hypothèse nulle (absence de co-variation) pour un test à 1% si p-value \< 0.01.
+
+### L'indice local d'autocorrélation spatiale (LISA)
+
+L'indice d’autocorrélation spatiale locale mesure l’intensité et la significativité de la dépendance locale entre la valeur d'une variable dans une unité spatiale donnée et les valeurs de cette variable dans les unités spatiales voisines. Il permet donc :
+
+-   d’identifier la participation de chaque unité spatiale au niveau d’autocorrélation spatiale global;
+
+-   de mettre en évidence les "poches" de forte autocorrélation spatiale.
+
+Pour le calculer, on suivra les étapes suivantes :
+
+```{r}
+
+# création de la matrice de poids (format pkg rgeoda)
+queen_w <- queen_weights(pxIrisWona)
+
+# calcul de l'indice local de moran
+lisa <- local_moran(queen_w, pxIrisWona['pxm2med'])
+
+# extraction des clusters lisa
+# choix du seuil de significativité
+cats <- lisa_clusters(lisa)
+
+# ajout de la colonne cluster à la table des communes
+pxIrisWona$clusters <- factor(cats, levels = 0:6)
+
+# Création d'un data frame pour faire correspondre les couleurs et les labels sur la figure.
+lisa_cols <- data.frame(value = c(0:6),
+                        colors=lisa_colors(lisa),
+                        labels=lisa_labels(lisa))
+
+# Cartographie
+ggplot() +
+  geom_sf(data = pxIrisMars, fill=NA)+
+  geom_sf(data = pxIrisWona, aes(fill = clusters)) +
+  scale_fill_manual(
+    values = setNames(lisa_cols$colors, lisa_cols$value),
+    labels = setNames(lisa_cols$labels, lisa_cols$value),
+    name = "LISA Clusters"
+  ) +
+  theme_minimal() +
+  labs(title = "Carte des clusters LISA",
+       subtitle = "Basée sur le prix médian au m² des appartements (2022-2023)", 
+    caption = "Source : DVF+ (DGFIP/DGALN/Cerema)\nAuteur : A. Peris, 2025") +
+  theme(legend.position = "bottom")
+```
+
+Si l’unité spatiale étudiée présente une valeur forte dans un voisinage également marqué par des valeurs fortes, il y a situation d’autocorrélation spatiale positive avec des valeurs fortes, appelée High-High. Si l’unité spatiale présente une valeur faible et son voisinage également, on est également en situation d’autocorrélation spatiale positive mais du côté des valeurs faibles (Low-Low). Si l’unité spatiale possède une valeur forte dans un voisinage dont la moyenne des valeurs n’est pas forte, on parle d’autocorrélation spatiale négative qualifiée de High-Low. Si à l’inverse, l’unité spatiale possède une valeur faible dans un voisinage qui ne lui ressemble pas, on est en situation d’autocorrélation spatiale négative Low-High. Enfin, les autres unités spatiales sont rassemblées dans une dernière catégorie qui décrit une situation non significative.
+
+Les communes rouges sont donc des espaces de concentration spatiale des quartiers aux niveaux de prix élevés. Les bleues, des prix bas. Les communes grises constituent un espace plus hétérogène.
