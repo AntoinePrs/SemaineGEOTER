@@ -317,6 +317,16 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
+<p>On sauvegarde les données pour y revenir plus tard.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(px_iris_sf, <span class="st">"../data/pxIrisMars.gpkg"</span>, <span class="at">append =</span>F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>Deleting layer `pxIrisMars' using driver `GPKG'
+Writing layer `pxIrisMars' to data source 
+  `../data/pxIrisMars.gpkg' using driver `GPKG'
+Writing 393 features with 6 fields and geometry type Multi Polygon.</code></pre>
+</div>
+</div>
 </section>
 </section>
 

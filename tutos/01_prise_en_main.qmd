@@ -29,12 +29,15 @@ Connection à un serveur PostgreSQL
 #| message: false
 #| warning: false
 #| output: false
+
+cred <- read.delim("../cred.txt", sep = ",")
+
 con <- dbConnect(RPostgres::Postgres(), 
                  dbname = "dvfplus",
-                 host="localhost", 
-                 port='5432', 
-                 user="postgres", 
-                 password="postgres")
+                 host=cred$host, 
+                 port=cred$port, 
+                 user=cred$user, 
+                 password=cred$mdp)
 ```
 
 Requête SQL sur la base de données pour récupérer toutes les transactions immobilières portant sur une maison ou un appartement dans le département des Bouches-du-Rhône. La fonction `st_read()` du package `sf` permet de lire des données spatiales vectorielles.

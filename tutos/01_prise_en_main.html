@@ -125,12 +125,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="chargement">Chargement</h3>
 <p>Connection à un serveur PostgreSQL</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RPostgres<span class="sc">::</span><span class="fu">Postgres</span>(), </span>
-<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>                 <span class="at">dbname =</span> <span class="st">"dvfplus"</span>,</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>                 <span class="at">host=</span><span class="st">"localhost"</span>, </span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">port=</span><span class="st">'5432'</span>, </span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">user=</span><span class="st">"postgres"</span>, </span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">password=</span><span class="st">"postgres"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a>cred <span class="ot">&lt;-</span> <span class="fu">read.delim</span>(<span class="st">"../cred.txt"</span>, <span class="at">sep =</span> <span class="st">","</span>)</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>con <span class="ot">&lt;-</span> <span class="fu">dbConnect</span>(RPostgres<span class="sc">::</span><span class="fu">Postgres</span>(), </span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>                 <span class="at">dbname =</span> <span class="st">"dvfplus"</span>,</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>                 <span class="at">host=</span>cred<span class="sc">$</span>host, </span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>                 <span class="at">port=</span>cred<span class="sc">$</span>port, </span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>                 <span class="at">user=</span>cred<span class="sc">$</span>user, </span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>                 <span class="at">password=</span>cred<span class="sc">$</span>mdp)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Requête SQL sur la base de données pour récupérer toutes les transactions immobilières portant sur une maison ou un appartement dans le département des Bouches-du-Rhône. La fonction <code>st_read()</code> du package <code>sf</code> permet de lire des données spatiales vectorielles.</p>
 <div class="cell">
@@ -144,9 +146,52 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="st">AND coddep = '13'</span></span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="st">AND libtypbien IN ('UNE MAISON', 'UN APPARTEMENT')</span></span>
 <span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="st">AND geomlocmut IS NOT NULL</span></span>
-<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">AND valeurfonc IS NOT NULL"</span>)</span>
-<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(dvf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a><span class="st">AND valeurfonc IS NOT NULL"</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DEBUG:  parse &lt;unnamed&gt;: 
+SELECT idmutation, datemut, anneemut, moismut, coddep, libnatmut, vefa, valeurfonc, 
+l_codinsee, sterr, sbati, nblocmai, nblocapt,nblocdep, nbapt1pp, nbapt2pp, nbapt3pp, 
+nbapt4pp, nbapt5pp, nbmai1pp, nbmai2pp, nbmai3pp, nbmai4pp, nbmai5pp, 
+geomlocmut as geom
+FROM dvf.mutation
+WHERE nbcomm = 1
+AND coddep = '13'
+AND libtypbien IN ('UNE MAISON', 'UN APPARTEMENT')
+AND geomlocmut IS NOT NULL
+AND valeurfonc IS NOT NULL</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DEBUG:  bind &lt;unnamed&gt; to &lt;unnamed&gt;</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DEBUG:  rehashing catalog cache id 32 for pg_index; 129 tups, 64 buckets</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DEBUG:  rehashing catalog cache id 7 for pg_attribute; 257 tups, 128 buckets</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DEBUG:  rehashing catalog cache id 32 for pg_index; 257 tups, 128 buckets</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DEBUG:  rehashing catalog cache id 7 for pg_attribute; 513 tups, 256 buckets</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>DEBUG:  rehashing catalog cache id 32 for pg_index; 513 tups, 256 buckets</code></pre>
+</div>
+<div class="cell-output cell-output-stderr">
+<pre><code>LOG:  exécute &lt;unnamed&gt;: 
+SELECT idmutation, datemut, anneemut, moismut, coddep, libnatmut, vefa, valeurfonc, 
+l_codinsee, sterr, sbati, nblocmai, nblocapt,nblocdep, nbapt1pp, nbapt2pp, nbapt3pp, 
+nbapt4pp, nbapt5pp, nbmai1pp, nbmai2pp, nbmai3pp, nbmai4pp, nbmai5pp, 
+geomlocmut as geom
+FROM dvf.mutation
+WHERE nbcomm = 1
+AND coddep = '13'
+AND libtypbien IN ('UNE MAISON', 'UN APPARTEMENT')
+AND geomlocmut IS NOT NULL
+AND valeurfonc IS NOT NULL</code></pre>
+</div>
+<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">kable</span>(<span class="fu">head</span>(dvf))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -207,125 +252,125 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">1029976</td>
-<td style="text-align: left;">2023-11-03</td>
-<td style="text-align: right;">2023</td>
-<td style="text-align: right;">11</td>
-<td style="text-align: left;">13</td>
-<td style="text-align: left;">Vente</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">179110</td>
-<td style="text-align: left;">{13022}</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">25</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">POINT (905786.5 6239862)</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1040082</td>
-<td style="text-align: left;">2023-10-31</td>
-<td style="text-align: right;">2023</td>
-<td style="text-align: right;">10</td>
-<td style="text-align: left;">13</td>
-<td style="text-align: left;">Vente</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">358000</td>
-<td style="text-align: left;">{13001}</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">75</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">POINT (895584 6273803)</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1045037</td>
-<td style="text-align: left;">2023-02-07</td>
-<td style="text-align: right;">2023</td>
-<td style="text-align: right;">2</td>
-<td style="text-align: left;">13</td>
-<td style="text-align: left;">Vente</td>
-<td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">235000</td>
-<td style="text-align: left;">{13075}</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">65</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">POINT (900174.6 6253957)</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1052174</td>
-<td style="text-align: left;">2023-06-22</td>
-<td style="text-align: right;">2023</td>
+<td style="text-align: right;">1184799</td>
+<td style="text-align: left;">2024-06-07</td>
+<td style="text-align: right;">2024</td>
 <td style="text-align: right;">6</td>
 <td style="text-align: left;">13</td>
 <td style="text-align: left;">Vente</td>
 <td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">113700</td>
-<td style="text-align: left;">{13211}</td>
+<td style="text-align: right;">158000</td>
+<td style="text-align: left;">{13005}</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">61</td>
+<td style="text-align: right;">47</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">POINT (908641.8 6247361)</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1185715</td>
+<td style="text-align: left;">2024-02-13</td>
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">2</td>
+<td style="text-align: left;">13</td>
+<td style="text-align: left;">Vente</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">545000</td>
+<td style="text-align: left;">{13210}</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">120</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: left;">POINT (898085.7 6247184)</td>
+<td style="text-align: left;">POINT (894694.6 6245307)</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">1053362</td>
-<td style="text-align: left;">2023-01-17</td>
-<td style="text-align: right;">2023</td>
+<td style="text-align: right;">1191450</td>
+<td style="text-align: left;">2024-01-03</td>
+<td style="text-align: right;">2024</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: left;">13</td>
 <td style="text-align: left;">Vente</td>
 <td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">356700</td>
+<td style="text-align: right;">159680</td>
+<td style="text-align: left;">{13209}</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">37</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">POINT (895262.1 6241606)</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1229922</td>
+<td style="text-align: left;">2023-08-07</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">8</td>
+<td style="text-align: left;">13</td>
+<td style="text-align: left;">Vente</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">255500</td>
 <td style="text-align: left;">{13001}</td>
-<td style="text-align: right;">23</td>
-<td style="text-align: right;">70</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">39</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: left;">POINT (897161.9 6272697)</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1231332</td>
+<td style="text-align: left;">2023-07-28</td>
+<td style="text-align: right;">2023</td>
+<td style="text-align: right;">7</td>
+<td style="text-align: left;">13</td>
+<td style="text-align: left;">Vente</td>
+<td style="text-align: left;">FALSE</td>
+<td style="text-align: right;">250652</td>
+<td style="text-align: left;">{13022}</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">68</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">2</td>
@@ -339,25 +384,25 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: left;">MULTIPOINT ((896019.4 62708…</td>
+<td style="text-align: left;">POINT (905786.5 6239862)</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">1057226</td>
-<td style="text-align: left;">2023-04-04</td>
+<td style="text-align: right;">1242551</td>
+<td style="text-align: left;">2023-07-10</td>
 <td style="text-align: right;">2023</td>
-<td style="text-align: right;">4</td>
+<td style="text-align: right;">7</td>
 <td style="text-align: left;">13</td>
 <td style="text-align: left;">Vente</td>
 <td style="text-align: left;">FALSE</td>
-<td style="text-align: right;">304050</td>
-<td style="text-align: left;">{13022}</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">52</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">1</td>
+<td style="text-align: right;">180000</td>
+<td style="text-align: left;">{13001}</td>
+<td style="text-align: right;">11</td>
+<td style="text-align: right;">32</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
@@ -366,7 +411,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
-<td style="text-align: left;">POINT (905786.5 6239862)</td>
+<td style="text-align: left;">MULTIPOINT ((896028.4 62708…</td>
 </tr>
 </tbody>
 </table>
@@ -378,29 +423,29 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <h3 class="anchored" data-anchor-id="nettoyage">Nettoyage</h3>
 <p>Pour nettoyer les données, il est possible d’utiliser le package <code>dplyr</code>, qui implémente une syntaxe permettant de filtrer des données selon des conditions, de sélectionner des colonnes ou encore d’appliquer des fonctions afin de nettoyer les données. Par exemple, dans notre tableau, la colonne <code>l_codinsee</code> comporte des codes communes entourés d’accolades dont on voudrait se débarasser.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dvf<span class="sc">$</span>l_codinsee)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb13"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dvf<span class="sc">$</span>l_codinsee)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "{13022}" "{13001}" "{13075}" "{13211}" "{13001}" "{13022}"</code></pre>
+<pre><code>[1] "{13005}" "{13210}" "{13209}" "{13001}" "{13022}" "{13001}"</code></pre>
 </div>
 </div>
 <p>On applique alors une fonction pour extraire les caractères 2 à 6 de chaque cellule grâce au verbe <code>mutate()</code> qui permet la modification d’une colonne. Le verbe <code>select()</code> permet la sélection (ou non) de colonnes données.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb6"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">code_insee =</span> <span class="fu">as.character</span>(<span class="fu">substr</span>(l_codinsee, <span class="dv">2</span>, <span class="dv">6</span>))) <span class="sc">%&gt;%</span> </span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>l_codinsee)</span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dvf<span class="sc">$</span>code_insee)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">code_insee =</span> <span class="fu">as.character</span>(<span class="fu">substr</span>(l_codinsee, <span class="dv">2</span>, <span class="dv">6</span>))) <span class="sc">%&gt;%</span> </span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>l_codinsee)</span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(dvf<span class="sc">$</span>code_insee)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
-<pre><code>[1] "13022" "13001" "13075" "13211" "13001" "13022"</code></pre>
+<pre><code>[1] "13005" "13210" "13209" "13001" "13022" "13001"</code></pre>
 </div>
 </div>
 <p>L’information sur le nombre de pièces du logement est stockée dans un format qui n’est pas pratique à manipuler.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb8"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(idmutation, nbapt1pp<span class="sc">:</span>nbmai5pp) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(idmutation, nbapt1pp<span class="sc">:</span>nbmai5pp) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <colgroup>
@@ -433,7 +478,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </thead>
 <tbody>
 <tr class="odd">
-<td style="text-align: right;">1029976</td>
+<td style="text-align: right;">1184799</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
 <td style="text-align: right;">0</td>
@@ -446,7 +491,85 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">1040082</td>
+<td style="text-align: right;">1185715</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1191450</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1229922</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1231332</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1242551</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">1303503</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">1</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+<td style="text-align: right;">0</td>
+</tr>
+<tr class="even">
+<td style="text-align: right;">1303736</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
@@ -459,7 +582,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0</td>
 </tr>
 <tr class="odd">
-<td style="text-align: right;">1045037</td>
+<td style="text-align: right;">1306333</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
@@ -472,88 +595,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <td style="text-align: right;">0</td>
 </tr>
 <tr class="even">
-<td style="text-align: right;">1052174</td>
+<td style="text-align: right;">1306738</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1053362</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1057226</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1109353</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1110727</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-</tr>
-<tr class="odd">
-<td style="text-align: right;">1127496</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-</tr>
-<tr class="even">
-<td style="text-align: right;">1111850</td>
-<td style="text-align: right;">0</td>
-<td style="text-align: right;">1</td>
-<td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
 <td style="text-align: right;">0</td>
@@ -568,38 +613,38 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 <p>L’opération qui suit va appliquer une série de fonction afin de transformer ce tableau en format “large” en tableau en format “long” où chaque <code>idmutation</code> sera associé à un nombre de pièces.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb9"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a>piece_long <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> <span class="co"># transformation en tableau</span></span>
-<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(idmutation, nbapt1pp<span class="sc">:</span>nbmai5pp) <span class="sc">%&gt;%</span> <span class="co"># extraction des colonnes de référence </span></span>
-<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(nbapt1pp<span class="sc">:</span>nbmai5pp) <span class="sc">%&gt;%</span> <span class="co"># passage en format long</span></span>
-<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(value<span class="sc">==</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="co"># élimination des 0</span></span>
-<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">nbpiece=</span><span class="fu">as.numeric</span>(<span class="fu">substr</span>(name,<span class="dv">6</span>,<span class="dv">6</span>))) <span class="sc">%&gt;%</span> <span class="co"># extraction du nombre </span></span>
-<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(idmutation, nbpiece) <span class="co"># sélection des deux colonnes d'intérêt</span></span>
-<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Jointure du nouveau format au tableau original</span></span>
-<span id="cb9-10"><a href="#cb9-10" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> <span class="fu">left_join</span>(dvf, piece_long, <span class="at">by=</span><span class="st">"idmutation"</span>)</span>
-<span id="cb9-11"><a href="#cb9-11" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-12"><a href="#cb9-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Suppression des anciennes colonnes</span></span>
-<span id="cb9-13"><a href="#cb9-13" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf[,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="dv">23</span><span class="sc">:</span><span class="dv">25</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>piece_long <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> <span class="co"># transformation en tableau</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(idmutation, nbapt1pp<span class="sc">:</span>nbmai5pp) <span class="sc">%&gt;%</span> <span class="co"># extraction des colonnes de référence </span></span>
+<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(nbapt1pp<span class="sc">:</span>nbmai5pp) <span class="sc">%&gt;%</span> <span class="co"># passage en format long</span></span>
+<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(value<span class="sc">==</span><span class="dv">1</span>) <span class="sc">%&gt;%</span> <span class="co"># élimination des 0</span></span>
+<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">nbpiece=</span><span class="fu">as.numeric</span>(<span class="fu">substr</span>(name,<span class="dv">6</span>,<span class="dv">6</span>))) <span class="sc">%&gt;%</span> <span class="co"># extraction du nombre </span></span>
+<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(idmutation, nbpiece) <span class="co"># sélection des deux colonnes d'intérêt</span></span>
+<span id="cb18-8"><a href="#cb18-8" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-9"><a href="#cb18-9" aria-hidden="true" tabindex="-1"></a><span class="co"># Jointure du nouveau format au tableau original</span></span>
+<span id="cb18-10"><a href="#cb18-10" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> <span class="fu">left_join</span>(dvf, piece_long, <span class="at">by=</span><span class="st">"idmutation"</span>)</span>
+<span id="cb18-11"><a href="#cb18-11" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb18-12"><a href="#cb18-12" aria-hidden="true" tabindex="-1"></a><span class="co"># Suppression des anciennes colonnes</span></span>
+<span id="cb18-13"><a href="#cb18-13" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf[,<span class="fu">c</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">12</span>, <span class="dv">23</span><span class="sc">:</span><span class="dv">25</span>)]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>On veut également que l’information décrivant si le logement est un appartement ou une maison soit stockée dans une seule colonne.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">maison =</span> <span class="fu">ifelse</span>(nblocmai<span class="sc">==</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
-<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>nblocmai, <span class="sc">-</span>nblocapt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">maison =</span> <span class="fu">ifelse</span>(nblocmai<span class="sc">==</span><span class="dv">1</span>, <span class="dv">1</span>, <span class="dv">0</span>)) <span class="sc">%&gt;%</span> </span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">select</span>(<span class="sc">-</span>nblocmai, <span class="sc">-</span>nblocapt)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Enfin, nous calculons un prix au m² qui sera stocké dans le tableau.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb11"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pxm2 =</span> valeurfonc <span class="sc">/</span> sbati)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="at">pxm2 =</span> valeurfonc <span class="sc">/</span> sbati)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Une fois propres, on peut sauvegarder les données dans le format souhaité (en geopackage par exemple) :</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb12"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(dvf, <span class="st">"../data/dvf13.gpkg"</span>, <span class="at">append =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="fu">st_write</span>(dvf, <span class="st">"../data/dvf13.gpkg"</span>, <span class="at">append =</span> F)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>Deleting layer `dvf13' using driver `GPKG'
 Writing layer `dvf13' to data source `../data/dvf13.gpkg' using driver `GPKG'
-Writing 266065 features with 15 fields and geometry type Unknown (any).</code></pre>
+Writing 277008 features with 15 fields and geometry type Unknown (any).</code></pre>
 </div>
 </div>
 </section>
@@ -608,11 +653,11 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 <h2 class="anchored" data-anchor-id="statistiques-descriptives">Statistiques descriptives</h2>
 <p>Lorsque l’on l’on manipule des <em>microdonnées</em>, c’est à dire des données désagrégées ou les entités élémentaires (ici les transactions immobilières) correspondent à une ligne du tableau, il n’est pas rare de devoir effectuer des agrégations. Pour cela, le verbe <code>group_by()</code> peut être utilisé en combinaison avec <code>summarise()</code> qui permet de créer une nouvelle colonne calculée. On pourra par exemple effectuer une moyenne avec <code>mean()</code>, une médiane avec <code>median()</code>, rechercher des bornes avec <code>min()</code> ou <code>max()</code> ou encore dénombrer avec <code>n()</code> comme dans l’exemple suivant sur le nombre de transactions correspondant à des maisons et des appartements.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb14"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(maison) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">nb=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb23"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb23-2"><a href="#cb23-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb23-3"><a href="#cb23-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(maison) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-4"><a href="#cb23-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">nb=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb23-5"><a href="#cb23-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -624,11 +669,11 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 <tbody>
 <tr class="odd">
 <td style="text-align: right;">0</td>
-<td style="text-align: right;">179518</td>
+<td style="text-align: right;">187264</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">1</td>
-<td style="text-align: right;">86547</td>
+<td style="text-align: right;">89744</td>
 </tr>
 </tbody>
 </table>
@@ -636,11 +681,11 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </div>
 <p>Volumes annuels de transactions.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb15"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anneemut) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">volume=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb24"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anneemut) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">volume=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb24-5"><a href="#cb24-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -676,19 +721,23 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2020</td>
-<td style="text-align: right;">27199</td>
+<td style="text-align: right;">27200</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2021</td>
-<td style="text-align: right;">32453</td>
+<td style="text-align: right;">32468</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2022</td>
-<td style="text-align: right;">31260</td>
+<td style="text-align: right;">31271</td>
 </tr>
 <tr class="even">
 <td style="text-align: right;">2023</td>
-<td style="text-align: right;">23543</td>
+<td style="text-align: right;">24449</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">10010</td>
 </tr>
 </tbody>
 </table>
@@ -696,13 +745,13 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </div>
 <p>Communes où il y a eu le plus de ventes</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb16"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(code_insee) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">volume=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(volume)) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb25"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(code_insee) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">volume=</span><span class="fu">n</span>()) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-5"><a href="#cb25-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(volume)) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-6"><a href="#cb25-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb25-7"><a href="#cb25-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -714,43 +763,43 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">13001</td>
-<td style="text-align: right;">22768</td>
+<td style="text-align: right;">23568</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">13208</td>
-<td style="text-align: right;">13811</td>
+<td style="text-align: right;">14472</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">13209</td>
-<td style="text-align: right;">11308</td>
+<td style="text-align: right;">11731</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">13213</td>
-<td style="text-align: right;">10550</td>
+<td style="text-align: right;">10937</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">13205</td>
-<td style="text-align: right;">9792</td>
+<td style="text-align: right;">10284</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">13204</td>
-<td style="text-align: right;">9553</td>
+<td style="text-align: right;">9958</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">13212</td>
-<td style="text-align: right;">9422</td>
+<td style="text-align: right;">9825</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">13206</td>
-<td style="text-align: right;">9294</td>
+<td style="text-align: right;">9709</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">13210</td>
-<td style="text-align: right;">8484</td>
+<td style="text-align: right;">8895</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">13207</td>
-<td style="text-align: right;">7487</td>
+<td style="text-align: right;">7825</td>
 </tr>
 </tbody>
 </table>
@@ -758,11 +807,11 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </div>
 <p>Prix médian des transactions par an</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb17"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anneemut) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mediane=</span><span class="fu">median</span>(valeurfonc)) <span class="sc">%&gt;%</span> </span>
-<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb26"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb26-1"><a href="#cb26-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb26-2"><a href="#cb26-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb26-3"><a href="#cb26-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anneemut) <span class="sc">%&gt;%</span> </span>
+<span id="cb26-4"><a href="#cb26-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">mediane=</span><span class="fu">median</span>(valeurfonc)) <span class="sc">%&gt;%</span> </span>
+<span id="cb26-5"><a href="#cb26-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -802,7 +851,7 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </tr>
 <tr class="even">
 <td style="text-align: right;">2021</td>
-<td style="text-align: right;">207000</td>
+<td style="text-align: right;">206897</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2022</td>
@@ -810,7 +859,11 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </tr>
 <tr class="even">
 <td style="text-align: right;">2023</td>
-<td style="text-align: right;">219000</td>
+<td style="text-align: right;">217000</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">206135</td>
 </tr>
 </tbody>
 </table>
@@ -818,13 +871,13 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </div>
 <p>Communes où les prix au m² les plus élevés.</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb18"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(code_insee) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-4"><a href="#cb18-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pxm2med=</span><span class="fu">median</span>(pxm2)) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-5"><a href="#cb18-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(pxm2med)) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-6"><a href="#cb18-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
-<span id="cb18-7"><a href="#cb18-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb27"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a>dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(code_insee) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pxm2med=</span><span class="fu">median</span>(pxm2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(<span class="fu">desc</span>(pxm2med)) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-6"><a href="#cb27-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">slice</span>(<span class="dv">1</span><span class="sc">:</span><span class="dv">10</span>) <span class="sc">%&gt;%</span> </span>
+<span id="cb27-7"><a href="#cb27-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -836,27 +889,27 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 <tbody>
 <tr class="odd">
 <td style="text-align: left;">13022</td>
-<td style="text-align: right;">6069.048</td>
+<td style="text-align: right;">6112.222</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">13034</td>
-<td style="text-align: right;">5769.166</td>
+<td style="text-align: right;">5850.000</td>
 </tr>
 <tr class="odd">
-<td style="text-align: left;">13095</td>
-<td style="text-align: right;">5652.863</td>
+<td style="text-align: left;">13012</td>
+<td style="text-align: right;">5729.167</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">13012</td>
-<td style="text-align: right;">5580.142</td>
+<td style="text-align: left;">13095</td>
+<td style="text-align: right;">5700.103</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">13104</td>
-<td style="text-align: right;">5555.556</td>
+<td style="text-align: right;">5575.540</td>
 </tr>
 <tr class="even">
 <td style="text-align: left;">13021</td>
-<td style="text-align: right;">5034.848</td>
+<td style="text-align: right;">5038.858</td>
 </tr>
 <tr class="odd">
 <td style="text-align: left;">13109</td>
@@ -868,11 +921,11 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </tr>
 <tr class="odd">
 <td style="text-align: left;">13033</td>
-<td style="text-align: right;">4507.259</td>
+<td style="text-align: right;">4537.045</td>
 </tr>
 <tr class="even">
-<td style="text-align: left;">13011</td>
-<td style="text-align: right;">4497.427</td>
+<td style="text-align: left;">13032</td>
+<td style="text-align: right;">4525.378</td>
 </tr>
 </tbody>
 </table>
@@ -880,23 +933,23 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </div>
 <p>Le verbe <code>filter()</code> permet d’extraire des données selon des conditions (de la même manière qu’un <code>WHERE</code> en SQL. Par exemple si on veut extraire les données correspondant aux maisons, on écrira :</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb19"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a>dvfmais <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(maison<span class="sc">==</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb28"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a>dvfmais <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(maison<span class="sc">==</span><span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Si on veut les appartements d’une pièce dans le premier arrondissement de Marseille :</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb20"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a>dvf1pMars <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
-<span id="cb20-2"><a href="#cb20-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(maison<span class="sc">==</span><span class="dv">0</span>, </span>
-<span id="cb20-3"><a href="#cb20-3" aria-hidden="true" tabindex="-1"></a>         code_insee <span class="sc">==</span> <span class="st">"13201"</span>, </span>
-<span id="cb20-4"><a href="#cb20-4" aria-hidden="true" tabindex="-1"></a>         nbpiece <span class="sc">==</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a>dvf1pMars <span class="ot">&lt;-</span> dvf <span class="sc">%&gt;%</span> </span>
+<span id="cb29-2"><a href="#cb29-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(maison<span class="sc">==</span><span class="dv">0</span>, </span>
+<span id="cb29-3"><a href="#cb29-3" aria-hidden="true" tabindex="-1"></a>         code_insee <span class="sc">==</span> <span class="st">"13201"</span>, </span>
+<span id="cb29-4"><a href="#cb29-4" aria-hidden="true" tabindex="-1"></a>         nbpiece <span class="sc">==</span> <span class="dv">1</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Ainsi, l’évolution du prix médian au m² des 1 pièces dans le premier arrondissement :</p>
 <div class="cell">
-<div class="sourceCode cell-code" id="cb21"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a>dvf1pMars <span class="sc">%&gt;%</span> </span>
-<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
-<span id="cb21-3"><a href="#cb21-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anneemut) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-4"><a href="#cb21-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pxm2med=</span><span class="fu">median</span>(pxm2)) <span class="sc">%&gt;%</span> </span>
-<span id="cb21-5"><a href="#cb21-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="sourceCode cell-code" id="cb30"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb30-1"><a href="#cb30-1" aria-hidden="true" tabindex="-1"></a>dvf1pMars <span class="sc">%&gt;%</span> </span>
+<span id="cb30-2"><a href="#cb30-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">as_tibble</span>() <span class="sc">%&gt;%</span> </span>
+<span id="cb30-3"><a href="#cb30-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(anneemut) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-4"><a href="#cb30-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">pxm2med=</span><span class="fu">median</span>(pxm2)) <span class="sc">%&gt;%</span> </span>
+<span id="cb30-5"><a href="#cb30-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">kable</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output-display">
 <table class="caption-top table table-sm table-striped small">
 <thead>
@@ -936,7 +989,7 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </tr>
 <tr class="even">
 <td style="text-align: right;">2021</td>
-<td style="text-align: right;">3035.714</td>
+<td style="text-align: right;">3039.596</td>
 </tr>
 <tr class="odd">
 <td style="text-align: right;">2022</td>
@@ -944,7 +997,11 @@ Writing 266065 features with 15 fields and geometry type Unknown (any).</code></
 </tr>
 <tr class="even">
 <td style="text-align: right;">2023</td>
-<td style="text-align: right;">3400.000</td>
+<td style="text-align: right;">3404.545</td>
+</tr>
+<tr class="odd">
+<td style="text-align: right;">2024</td>
+<td style="text-align: right;">3562.500</td>
 </tr>
 </tbody>
 </table>

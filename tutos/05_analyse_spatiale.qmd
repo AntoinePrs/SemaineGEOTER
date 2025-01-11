@@ -5,7 +5,7 @@ date: "01/15/2025"
 format: html
 ---
 
-Ce tutoriel est très largement inspiré du cours de R. Leconte : <https://github.com/leconter/SPACER/blob/main/03_Disc.Rmd>
+Ce tutoriel est très largement inspiré du cours de R. Leconte : <https://github.com/leconter/SPACER/tree/main>
 
 Packages
 

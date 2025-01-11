@@ -9,7 +9,8 @@ Supports utilisés lors de la semaine thématique sur les données massives du M
 1. Prise en main de DVF+
 2. Visualisation avec `ggplot2`
 3. Cartographie avec `sf` et `ggplot2`
-4. Analyse spatiale (discontinuités et auto-corrélation spatiale)
+4. Fonctions et boucles
+5. Analyse spatiale (discontinuités et auto-corrélation spatiale)
 
 ## Données
 
@@ -17,13 +18,17 @@ Supports utilisés lors de la semaine thématique sur les données massives du M
 - [ADMIN-EXPRESS (IGN)](https://data.geopf.fr/telechargement/download/ADMIN-EXPRESS-COG/ADMIN-EXPRESS-COG_3-2__SHP_LAMB93_FXX_2023-05-03/ADMIN-EXPRESS-COG_3-2__SHP_LAMB93_FXX_2023-05-03.7z)
 - [Contours-IRIS](https://data.geopf.fr/telechargement/download/CONTOURS-IRIS/CONTOURS-IRIS_3-0__SHP__FRA_2023-01-01/CONTOURS-IRIS_3-0__SHP__FRA_2023-01-01.7z) 
 
+## Prérequis
+
+Bases en R, en SQL et en statistiques.
+
+Pour que le tuto fonctionne, il faut avoir au préalable chargé le dump SQL de DVF+ dans une base PostgreSQL avec PostGIS activé.
+
 ## Ressources complémentaires
 
 ### Articles
 
-- Casanova Enault L., Boulay G., Coulon M., 2019, « Une aubaine pour les 
-  géographes ? Intérêts des fichiers open DVF sur les transactions 
-  foncières et immobilières et précautions d’usage », *Cybergeo : European Journal of Geography*, https://journals.openedition.org/cybergeo/33602
+- Casanova Enault L., Boulay G., Coulon M., 2019, « Une aubaine pour les géographes ? Intérêts des fichiers open DVF sur les transactions foncières et immobilières et précautions d’usage », *Cybergeo : European Journal of Geography*, https://journals.openedition.org/cybergeo/33602
 - Mericskay B.,  Demoraes F., « Préparer et analyser les données de "Demandes de valeurs foncières" en *open data* : proposition d’une méthodologie reproductible », *Cybergeo: European Journal of Geography*, https://doi.org/10.4000/cybergeo.39583
 
 ### Tutoriels et cours

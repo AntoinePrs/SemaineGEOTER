@@ -52,6 +52,14 @@ ggplot() +
   theme_minimal()
 ```
 
+Comme l'année 2024 n'est pas complète. Pour la suite du tuto, on l'exclue du data frame.
+
+```{r}
+dvf <- dvf %>% 
+  filter(anneemut != 2024)
+```
+
+
 ## Différents types de graphiques 
 
 ### Histogrammes
