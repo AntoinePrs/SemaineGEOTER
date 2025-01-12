@@ -42,7 +42,7 @@ con <- dbConnect(RPostgres::Postgres(),
 
 Requête SQL sur la base de données pour récupérer toutes les transactions immobilières portant sur une maison ou un appartement dans le département des Bouches-du-Rhône. La fonction `st_read()` du package `sf` permet de lire des données spatiales vectorielles.
 
-```{r}
+```{r, results='hide'}
 #| message: false
 #| warning: false
 dvf <- st_read(con, query = "
@@ -56,7 +56,11 @@ AND coddep = '13'
 AND libtypbien IN ('UNE MAISON', 'UN APPARTEMENT')
 AND geomlocmut IS NOT NULL
 AND valeurfonc IS NOT NULL")
+```
 
+On regarde les premières lignes de la table.
+
+```{r}
 kable(head(dvf))
 ```
 
