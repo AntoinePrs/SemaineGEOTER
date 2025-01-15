@@ -68,9 +68,9 @@ ggplot()+
 
 # Algorithme de discrétisation
 bks <- mapsf::mf_get_breaks(irisgeo$pxm2med, 
-                     nbreaks = 6, 
-                     breaks = "msd", 
-                     central = T)
+                            nbreaks = 6, 
+                            breaks = "msd", 
+                            central = T)
 
 # On supprime les classes 7 et 8
 bks <- bks[c(1:6, 9)]
@@ -84,8 +84,8 @@ ggplot()+
 ggplot()+
   annotation_map_tile(zoom=11, type = "cartolight")+
   geom_sf(data = irisgeo, aes(fill=pxm2med), 
-        #  alpha=.3
-          )+
+          #  alpha=.3
+  )+
   scale_fill_fermenter(breaks = bks, 
                        direction=1, 
                        palette = "YlOrRd")+
@@ -108,5 +108,3 @@ ggplot()+
           shape=21, alpha=.5)+
   scale_size_area(max_size = 6)+
   scale_fill_viridis_c()
-
-
